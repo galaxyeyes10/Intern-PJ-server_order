@@ -78,6 +78,18 @@ async def read_total_price(user_id: str, db: Session = Depends(get_db)):
     return total_price
 
 #주문하기 버튼 처리
+@order.put("/pay/{user_id}")
+async def update_state(user_id: str, db: Session = Depends(get_db)):
+    unpaid_orders = db.query(OrderTable).filter(
+        OrderTable.user_id == user_id,
+        OrderTable.is_completed == False
+    ).all()
+    
+    for order in unpaid_orders:
+        order.is_completed = True
+
+    db.commit()
+
 if __name__ == "__order__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("app:app", host="0.0.0.0", port=port)

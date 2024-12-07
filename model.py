@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean
+from sqlalchemy.sql import func
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, TIMESTAMP
 from sqlalchemy.orm import relationship
 from db import Base
 
@@ -56,7 +57,7 @@ class OrderTable(Base):
     menu_id = Column(Integer, ForeignKey('public.menu.menu_id'), nullable=False)
     quantity = Column(Integer)
     is_completed = Column(Boolean)
-    order_date = Column(Integer)
+    order_date = order_date = Column(TIMESTAMP, server_default=func.now())
     user = relationship("UserTable", back_populates="orders")
     menus = relationship("MenuTable", back_populates="order")
 
