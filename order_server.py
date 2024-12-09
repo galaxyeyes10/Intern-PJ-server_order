@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from sqlalchemy.orm import Session
 from model import ReviewTable, UserTable, StoreTable, OrderTable, MenuTable
 from db import session
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 import os
 import uvicorn
 
@@ -16,6 +17,7 @@ order.add_middleware(
     allow_headers=["*"],
 )
 
+order.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 
 def get_db():
     db = session()
@@ -23,6 +25,15 @@ def get_db():
         yield db
     finally:
         db.close()
+
+#로그인 상태 확인, 로그인 중인 유저 아이디 반환
+@order.get("/check_login/")
+async def check_login(request: Request):
+    # 세션에서 사용자 정보 확인
+    if "user_id" not in request.session:
+        return False
+    
+    return {"user_id": f"{request.session['user_id']}"}
 
 #총 수량 반환. 유저 아이디일치, 오더 테이블에서 완료 여부 false 만 계산 반환
 @order.get("/total_count/{user_id}")
